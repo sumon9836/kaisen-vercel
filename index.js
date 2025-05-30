@@ -81,6 +81,7 @@ console.log("Session downloaded ✅")
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 9090;
+const http = require("http");
   
   //=============================================
   
@@ -885,10 +886,22 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
     conn.serializeM = mek => sms(conn, mek, store);
   }
   
-  app.get("/", (req, res) => {
-  res.send("KAISEN MD STARTED ✅");
-  });
-  app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
-  setTimeout(() => {
-  connectToWA()
-  }, 4000);
+  // Root endpoint
+app.get("/", (req, res) => {
+  res.send("✅ KAISEN-MD bot is running on Render!");
+});
+
+// Start the server and connect to WhatsApp
+app.listen(port, async () => {
+  console.log(`✅ Web service running on http://localhost:${port}`);
+  try {
+    await connectToWA();
+  } catch (err) {
+    console.error("❌ WhatsApp connection failed:", err);
+  }
+});
+
+// Keep-alive ping for Render (every 4 minutes)
+setInterval(() => {
+  http.get("http://localhost:" + port);
+}, 4 * 60 * 1000);
